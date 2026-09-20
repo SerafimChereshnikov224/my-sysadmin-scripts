@@ -1,7 +1,18 @@
 #!/bin/bash
 
 INTERVAL=10
-LOG=monitor.log
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOG="$SCRIPT_DIR/monitor.log"
+
+if [ ! -w "$SCRIPT_DIR" ]; then
+    echo "Ошибка: нет прав на запись в $SCRIPT_DIR" >&2
+    exit 1
+fi
+
+if [ -e "$LOG" ] && [ ! -w "$LOG" ]; then
+    echo "Ошибка: нет прав на запись в $LOG" >&2
+    exit 1
+fi
 
 while true; do
     {
@@ -10,6 +21,7 @@ while true; do
         df -h
         uptime
         echo
-    } >> "$LOG"
+    } >> "$LOG" || { echo "Ошибка записи в $LOG" >&2; exit 1; }
+
     sleep "$INTERVAL"
 done
